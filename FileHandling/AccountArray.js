@@ -1,4 +1,5 @@
 const fs = require("fs-extra");
+const Logger = require("hyarcade-logger");
 const Account = require("hyarcade-requests/types/Account");
 
 module.exports = class Accounts {
@@ -57,7 +58,12 @@ module.exports = class Accounts {
 
     for(const fileName of files) {
       if(fileName.length == 37) {
-        accounts.push(await this.readAccount(fileName));
+        try {
+          const acc = await this.readAccount(fileName);
+          accounts.push(acc);
+        } catch(e) {
+          Logger.warn(`${fileName} had invalid data`);
+        }
       }
     }
 
