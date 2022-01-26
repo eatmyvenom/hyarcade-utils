@@ -4,7 +4,6 @@ const Account = require("hyarcade-requests/types/Account");
 const AccountArray = require("hyarcade-requests/types/AccountArray");
 const Json = require("../FileHandling/Json");
 const FileCache = require("../FileHandling/FileCache");
-const NormalizeAccount = require("./NormalizeAccount");
 
 /**
  * 
@@ -42,19 +41,6 @@ async function fakeStats (accounts) {
     Logger.err("Fake stats file unaccessable");
     return accounts;
   }
-}
-
-/**
- * 
- * @param {Account[]} accounts
- * @returns {Promise<Account[]>}
- */
-async function importance (accounts) {
-  for (const acc of accounts) {
-    acc.importance = NormalizeAccount(acc);
-  }
-
-  return accounts;
 }
 
 
@@ -264,8 +250,6 @@ async function applyMetadata (accs, fileCache) {
   let updatedAccs = uniqBy(accs, (a) => a.uuid);
   Logger.debug("Applying fake stats");
   updatedAccs = await fakeStats(updatedAccs);
-  Logger.debug("Applying importance");
-  updatedAccs = await importance(updatedAccs);
   Logger.debug("Applying discord ids");
   updatedAccs = await discordIDs(updatedAccs, fileCache);
   Logger.debug("Applying guild data");
