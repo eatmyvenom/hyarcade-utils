@@ -2,18 +2,18 @@ const Logger = require("hyarcade-logger");
 const { HypixelApi } = require("hyarcade-requests");
 const Account = require("hyarcade-requests/types/Account");
 const AccountArray = require("hyarcade-requests/types/AccountArray");
-const Json = require("../FileHandling/Json");
 const FileCache = require("../FileHandling/FileCache");
+const Json = require("../FileHandling/Json");
 
 /**
- * 
- * @param {Array} a 
- * @param {Function} key 
+ *
+ * @param {Array} a
+ * @param {Function} key
  * @returns {Array}
  */
-function uniqBy (a, key) {
+function uniqBy(a, key) {
   const seen = {};
-  return a.filter((item) => {
+  return a.filter(item => {
     const k = key(item);
     // eslint-disable-next-line no-prototype-builtins
     return seen.hasOwnProperty(k) ? false : (seen[k] = true);
@@ -21,16 +21,16 @@ function uniqBy (a, key) {
 }
 
 /**
- * 
- * @param {Account[]} accounts 
+ *
+ * @param {Account[]} accounts
  * @returns {Promise<Account[]>}
  */
-async function fakeStats (accounts) {
+async function fakeStats(accounts) {
   try {
     const fakeFile = await Json.read("fakeStats.json");
 
     for (const acc of accounts) {
-      if(Object.keys(fakeFile).includes(acc.uuid)) {
+      if (Object.keys(fakeFile).includes(acc.uuid)) {
         Logger.log(`Setting data for ${acc.name}`);
         Object.assign(acc, fakeFile[acc.uuid]);
       }
@@ -43,24 +43,22 @@ async function fakeStats (accounts) {
   }
 }
 
-
 /**
  * @param {object} object
  * @param {string} value
- * @returns {any} The value in the object 
+ * @returns {any} The value in the object
  */
-function getKeyByValue (object, value) {
-  return Object.keys(object).find((key) => object[key] == value);
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] == value);
 }
 
-
 /**
- * 
+ *
  * @param {Account[]} accounts
  * @param {FileCache} fileCache
  * @returns {Promise<Account[]>}
  */
-async function discordIDs (accounts, fileCache) {
+async function discordIDs(accounts, fileCache) {
   const disclist = fileCache?.disclist ?? {};
 
   for (const acc of accounts) {
@@ -71,31 +69,31 @@ async function discordIDs (accounts, fileCache) {
 }
 
 /**
- * 
+ *
  * @param {object[]} guildlist the raw guild list
  * @param {string} uuid the players uuid
  * @returns {object} The guild of the specified player
  */
-function getGuild (guildlist, uuid) {
-  for(const guild of guildlist) {
-    if(guild.memberUUIDs.includes((`${uuid.replace(/-/g, "")}`).toLowerCase())) {
+function getGuild(guildlist, uuid) {
+  for (const guild of guildlist) {
+    if (guild.memberUUIDs.includes(`${uuid.replace(/-/g, "")}`.toLowerCase())) {
       return guild;
     }
   }
 }
 
 /**
- * 
- * @param {Account[]} accounts 
+ *
+ * @param {Account[]} accounts
  * @param {FileCache} fileCache
  * @returns {Promise<Account[]>}
  */
-async function guilds (accounts, fileCache) {
+async function guilds(accounts, fileCache) {
   const guildlist = fileCache?.guilds ?? [];
 
   for (const acc of accounts) {
     const guild = getGuild(guildlist, acc.uuid);
-    if(guild) {
+    if (guild) {
       acc.guildID = guild.uuid;
       acc.guild = guild.name;
       acc.guildTag = guild.tag;
@@ -112,12 +110,12 @@ async function guilds (accounts, fileCache) {
 }
 
 /**
- * 
- * @param {Account[]} accounts 
+ *
+ * @param {Account[]} accounts
  * @param {FileCache} fileCache
  * @returns {Promise<Account[]>}
  */
-function hackerlist (accounts, fileCache) {
+function hackerlist(accounts, fileCache) {
   const hackerlist = fileCache?.hackerlist ?? [];
 
   for (const acc of accounts) {
@@ -128,12 +126,12 @@ function hackerlist (accounts, fileCache) {
 }
 
 /**
- * 
- * @param {Account[]} accounts 
+ *
+ * @param {Account[]} accounts
  * @param {FileCache} fileCache
  * @returns {Promise<Account[]>}
  */
-function banlist (accounts, fileCache) {
+function banlist(accounts, fileCache) {
   const banlist = fileCache?.banlist ?? [];
 
   for (const acc of accounts) {
@@ -144,17 +142,17 @@ function banlist (accounts, fileCache) {
 }
 
 /**
- * 
+ *
  * @param {Account[]} accounts
  * @param {Function} sorter
  * @param {string} key
  * @returns {Promise<Account[]>}
  */
-async function leaderboardStat (accounts, sorter, key) {
+async function leaderboardStat(accounts, sorter, key) {
   accounts.sort(sorter);
 
-  for(let i = 0; i < accounts.length; i += 1) {
-    if(accounts[i].positions == undefined) {
+  for (let i = 0; i < accounts.length; i += 1) {
+    if (accounts[i].positions == undefined) {
       accounts[i].positions = {};
     }
 
@@ -165,16 +163,20 @@ async function leaderboardStat (accounts, sorter, key) {
 }
 
 /**
- * 
+ *
  * @param {Account[]} accounts
  * @returns {Promise<Account[]>}
  */
-async function leaderboards (accounts) {
+async function leaderboards(accounts) {
   let accs = await leaderboardStat(accounts, (a, b) => b.blockingDead.wins - a.blockingDead.wins, "blockingDead");
   accs = await leaderboardStat(accounts, (a, b) => b.bountyHunters.wins - a.bountyHunters.wins, "bountyHunters");
   accs = await leaderboardStat(accounts, (a, b) => b.dragonWars.wins - a.dragonWars.wins, "dragonWars");
   accs = await leaderboardStat(accounts, (a, b) => b.captureTheWool.kills - a.captureTheWool.kills, "ctwKills");
-  accs = await leaderboardStat(accounts, (a, b) => b.captureTheWool.woolCaptures - a.captureTheWool.woolCaptures, "ctwCaptures");
+  accs = await leaderboardStat(
+    accounts,
+    (a, b) => b.captureTheWool.woolCaptures - a.captureTheWool.woolCaptures,
+    "ctwCaptures",
+  );
   accs = await leaderboardStat(accounts, (a, b) => b.arcadeWins - a.arcadeWins, "arcadeWins");
   accs = await leaderboardStat(accounts, (a, b) => b.enderSpleef.wins - a.enderSpleef.wins, "enderSpleef");
   accs = await leaderboardStat(accounts, (a, b) => b.farmhunt.wins - a.farmhunt.wins, "farmhunt");
@@ -195,11 +197,11 @@ async function leaderboards (accounts) {
 }
 
 /**
- * 
+ *
  * @param {Account[]} accounts
  * @returns {Promise<Account[]>}
  */
-async function coins (accounts) {
+async function coins(accounts) {
   const leaderboards = await HypixelApi.leaderboards();
 
   const arcade = leaderboards.leaderboards.ARCADE;
@@ -214,25 +216,25 @@ async function coins (accounts) {
   const monthly = arcade[2].leaders;
 
   for (const acc of accounts) {
-    if(acc.positions == undefined) {
+    if (acc.positions == undefined) {
       acc.positions = {};
     }
 
     const isLifetime = lifetime.includes(acc.uuidPosix);
 
-    if(acc.positions.coins < 76 && !isLifetime) {
+    if (acc.positions.coins < 76 && !isLifetime) {
       acc.banned = true;
     }
 
-    if(isLifetime) {
+    if (isLifetime) {
       acc.positions.ingameCoins = lifetime.indexOf(acc.uuidPosix) + 1;
     }
 
-    if(weekly.includes(acc.uuidPosix)) {
+    if (weekly.includes(acc.uuidPosix)) {
       acc.positions.weeklyCoins = weekly.indexOf(acc.uuidPosix) + 1;
     }
 
-    if(monthly.includes(acc.uuidPosix)) {
+    if (monthly.includes(acc.uuidPosix)) {
       acc.positions.monthlyCoins = monthly.indexOf(acc.uuidPosix) + 1;
     }
   }
@@ -241,13 +243,13 @@ async function coins (accounts) {
 }
 
 /**
- * 
- * @param {Account[]} accs 
- * @param {FileCache} fileCache 
+ *
+ * @param {Account[]} accs
+ * @param {FileCache} fileCache
  * @returns {Promise<Account[]>}
  */
-async function applyMetadata (accs, fileCache) {
-  let updatedAccs = uniqBy(accs, (a) => a.uuid);
+async function applyMetadata(accs, fileCache) {
+  let updatedAccs = uniqBy(accs, a => a.uuid);
   Logger.debug("Applying fake stats");
   updatedAccs = await fakeStats(updatedAccs);
   Logger.debug("Applying discord ids");
@@ -269,14 +271,14 @@ async function applyMetadata (accs, fileCache) {
 }
 
 /**
- * 
- * @param {Account[]} accounts 
+ *
+ * @param {Account[]} accounts
  * @returns {*}
  */
-function indexAccs (accounts) {
+function indexAccs(accounts) {
   const obj = {};
 
-  for(const acc of accounts) {
+  for (const acc of accounts) {
     obj[acc.uuid] = acc;
   }
 

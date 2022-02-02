@@ -5,7 +5,7 @@ const Account = require("hyarcade-requests/types/Account");
 module.exports = class Accounts {
   folderPath = "";
 
-  constructor (path) {
+  constructor(path) {
     this.folderPath = path;
   }
 
@@ -13,9 +13,9 @@ module.exports = class Accounts {
    *
    *
    * @param {string} uuid
-   * @returns {Account} 
+   * @returns {Account}
    */
-  async readAccount (uuid) {
+  async readAccount(uuid) {
     const realUuid = uuid.includes(".json") ? uuid : `${uuid}.json`;
 
     const file = await fs.readFile(`${this.folderPath}/${realUuid}`);
@@ -30,11 +30,11 @@ module.exports = class Accounts {
    * @param {string} uuid
    * @param {Account} data
    */
-  async writeAccount (uuid, data) {
+  async writeAccount(uuid, data) {
     const string = JSON.stringify(data, null, "\t");
     const fileName = uuid ?? data.uuid;
 
-    if(fileName.length != 32) {
+    if (fileName.length != 32) {
       return;
     }
 
@@ -42,26 +42,26 @@ module.exports = class Accounts {
   }
 
   /**
-   * 
-   * @param {Account[]} accounts 
+   *
+   * @param {Account[]} accounts
    */
-  async writeAccounts (accounts) {
-    for(const account of accounts) {
+  async writeAccounts(accounts) {
+    for (const account of accounts) {
       await this.writeAccount(account.uuid, account);
     }
   }
 
-  async readAccounts () {
+  async readAccounts() {
     const files = await fs.readdir(this.folderPath);
 
     const accounts = [];
 
-    for(const fileName of files) {
-      if(fileName.length == 37) {
+    for (const fileName of files) {
+      if (fileName.length == 37) {
         try {
           const acc = await this.readAccount(fileName);
           accounts.push(acc);
-        } catch(e) {
+        } catch (e) {
           Logger.warn(`${fileName} had invalid data`);
         }
       }
