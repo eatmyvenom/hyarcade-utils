@@ -116,9 +116,9 @@ class FileCache {
       this.modTime = Date.now();
       Logger.debug("Files saved...");
       this.dirty = false;
-    } catch (e) {
+    } catch (error) {
       Logger.err("ERROR SAVING FILES!");
-      Logger.err(e.stack);
+      Logger.err(error.stack);
     }
   }
 
@@ -153,9 +153,9 @@ class FileCache {
 
       const retroWeekly = await read("accounts.retro.weekly.json");
       fileCache.retro.weeklyaccounts = retroWeekly;
-    } catch (e) {
+    } catch (error) {
       Logger.err("Error refreshing static files!");
-      Logger.err(e.stack);
+      Logger.err(error.stack);
     }
 
     if (fileCache.dirty) {
@@ -226,9 +226,9 @@ class FileCache {
       fileCache.acclist = Object.keys(fileCache.indexedAccounts);
 
       Logger.debug("File cache updated");
-    } catch (e) {
+    } catch (error) {
       Logger.error("ERROR REFRESHING FILES!");
-      Logger.error(e.stack);
+      Logger.error(error.stack);
     }
 
     fileCache.ready = true;

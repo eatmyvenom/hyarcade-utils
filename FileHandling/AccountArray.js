@@ -31,7 +31,7 @@ module.exports = class Accounts {
    * @param {Account} data
    */
   async writeAccount(uuid, data) {
-    const string = JSON.stringify(data, null, "\t");
+    const string = JSON.stringify(data, undefined, "\t");
     const fileName = uuid ?? data.uuid;
 
     if (fileName.length != 32) {
@@ -61,7 +61,7 @@ module.exports = class Accounts {
         try {
           const acc = await this.readAccount(fileName);
           accounts.push(acc);
-        } catch (e) {
+        } catch {
           Logger.warn(`${fileName} had invalid data`);
         }
       }

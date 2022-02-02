@@ -16,11 +16,9 @@ async function read(path) {
  * @param {object} json the json data
  */
 async function write(path, json) {
-  if (Array.isArray(json)) {
-    await fs.writeFile(`data/${path}`, `[${json.map(acc => JSON.stringify(acc)).join(",")}]`);
-  } else {
-    await fs.writeFile(`data/${path}`, JSON.stringify(json, null, 4));
-  }
+  await (Array.isArray(json)
+    ? fs.writeFile(`data/${path}`, `[${json.map(acc => JSON.stringify(acc)).join(",")}]`)
+    : fs.writeFile(`data/${path}`, JSON.stringify(json, undefined, 4)));
 }
 
 module.exports = { read, write };

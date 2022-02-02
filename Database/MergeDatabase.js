@@ -37,7 +37,7 @@ async function fakeStats(accounts) {
     }
 
     return accounts;
-  } catch (e) {
+  } catch {
     Logger.err("Fake stats file unaccessable");
     return accounts;
   }
@@ -151,12 +151,12 @@ function banlist(accounts, fileCache) {
 async function leaderboardStat(accounts, sorter, key) {
   accounts.sort(sorter);
 
-  for (let i = 0; i < accounts.length; i += 1) {
-    if (accounts[i].positions == undefined) {
-      accounts[i].positions = {};
+  for (const [i, account] of accounts.entries()) {
+    if (account.positions == undefined) {
+      account.positions = {};
     }
 
-    accounts[i].positions[key] = i + 1;
+    account.positions[key] = i + 1;
   }
 
   return accounts;
@@ -172,11 +172,7 @@ async function leaderboards(accounts) {
   accs = await leaderboardStat(accounts, (a, b) => b.bountyHunters.wins - a.bountyHunters.wins, "bountyHunters");
   accs = await leaderboardStat(accounts, (a, b) => b.dragonWars.wins - a.dragonWars.wins, "dragonWars");
   accs = await leaderboardStat(accounts, (a, b) => b.captureTheWool.kills - a.captureTheWool.kills, "ctwKills");
-  accs = await leaderboardStat(
-    accounts,
-    (a, b) => b.captureTheWool.woolCaptures - a.captureTheWool.woolCaptures,
-    "ctwCaptures",
-  );
+  accs = await leaderboardStat(accounts, (a, b) => b.captureTheWool.woolCaptures - a.captureTheWool.woolCaptures, "ctwCaptures");
   accs = await leaderboardStat(accounts, (a, b) => b.arcadeWins - a.arcadeWins, "arcadeWins");
   accs = await leaderboardStat(accounts, (a, b) => b.enderSpleef.wins - a.enderSpleef.wins, "enderSpleef");
   accs = await leaderboardStat(accounts, (a, b) => b.farmhunt.wins - a.farmhunt.wins, "farmhunt");
